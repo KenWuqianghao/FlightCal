@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   title: "Flight Selector",
   description: "Select your flight and add it to your calendar",
   generator: 'v0.dev',
-  // icons: { // Temporarily commented out to debug hydration error
-  //   icon: '/flight-logo.png',
-  //   shortcut: '/flight-logo.png',
-  //   apple: '/flight-logo.png',
-  // },
+  icons: {
+    icon: '/flight-logo.png',
+    shortcut: '/flight-logo.png',
+    apple: '/flight-logo.png',
+  },
 }
 
 export default function RootLayout({
