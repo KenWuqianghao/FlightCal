@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     shortcut: '/flight-logo.png',
     apple: '/flight-logo.png',
   },
+  openGraph: {
+    images: ['https://flight-cal.vercel.app/screenshot.jpg'],
+  },
 }
 
 export default function RootLayout({
