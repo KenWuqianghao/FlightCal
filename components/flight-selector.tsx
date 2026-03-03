@@ -31,7 +31,7 @@ const formFieldVariants = {
 }
 
 interface FlightSelectorProps {
-  onFlightFound: (data: FlightInfo | null) => void
+  onFlightFound: (data: FlightInfo) => void
   hasResult: boolean
 }
 
@@ -57,7 +57,6 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
     }
 
     setIsLoading(true)
-    onFlightFound(null)
     try {
       const formattedDate = format(date, "yyyy-MM-dd")
       const data = await getFlightInfo(flightNumber, formattedDate, apiKeyToUse)

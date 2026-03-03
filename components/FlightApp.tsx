@@ -2,25 +2,34 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight } from '@phosphor-icons/react'
 import { FlightInfo } from '@/types/flight'
 import { FlightSelector } from './flight-selector'
 import FlightCard from './FlightCard'
 import GlobeWrapper from './GlobeWrapper'
+import { cn } from '@/lib/utils'
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 }
 
 export default function FlightApp() {
-  const [flightData, setFlightData] = useState<FlightInfo | null>(null)
-  const hasResult = !!flightData
+  const [flights, setFlights] = useState<FlightInfo[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const hasResult = flights.length > 0
+  const selectedFlight = flights[selectedIndex] ?? null
+
+  const handleFlightFound = (data: FlightInfo) => {
+    setFlights(prev => [data, ...prev])
+    setSelectedIndex(0)
+  }
+
+  const globeRoutes = flights.map(f => ({ origin: f.origin, destination: f.destination }))
 
   return (
     <main className="relative min-h-[100dvh] overflow-hidden bg-background text-foreground">
       {/* Globe */}
       <div className="absolute inset-0 lg:left-[40%] opacity-30 lg:opacity-100 transition-opacity duration-700">
-        <GlobeWrapper
-          origin={flightData?.origin}
-          destination={flightData?.destination}
-        />
+        <GlobeWrapper flights={globeRoutes} selectedIndex={selectedIndex} />
       </div>
 
       {/* Content grid */}
@@ -32,12 +41,8 @@ export default function FlightApp() {
             style={{ animation: 'scaleX 0.6s ease-out 0.3s both' }}
           />
 
-          {/* Header — shrinks when result is showing */}
-          <motion.header
-            layout
-            transition={spring}
-            className={hasResult ? 'mb-3' : 'mb-10'}
-          >
+          {/* Header */}
+          <motion.header layout transition={spring} className={hasResult ? 'mb-3' : 'mb-10'}>
             <motion.h1
               layout="position"
               transition={spring}
@@ -63,25 +68,48 @@ export default function FlightApp() {
           </motion.header>
 
           {/* Form */}
-          <FlightSelector onFlightFound={setFlightData} hasResult={hasResult} />
+          <FlightSelector onFlightFound={handleFlightFound} hasResult={hasResult} />
+
+          {/* Flight history chips */}
+          {flights.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto mt-3 pb-1 scrollbar-none">
+              {flights.map((f, i) => (
+                <button
+                  key={`${f.flightNumber}-${f.departureTime}-${i}`}
+                  onClick={() => setSelectedIndex(i)}
+                  className={cn(
+                    "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
+                    i === selectedIndex
+                      ? "bg-primary/15 border border-primary/25 text-primary"
+                      : "bg-white/[0.04] border border-white/[0.06] text-muted-foreground hover:bg-white/[0.08]"
+                  )}
+                >
+                  <span className="font-semibold">{f.flightNumber}</span>
+                  <span className="opacity-50">{f.origin}</span>
+                  <ArrowRight className="h-2.5 w-2.5 opacity-30" />
+                  <span className="opacity-50">{f.destination}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Flight card */}
           <AnimatePresence mode="wait">
-            {flightData && (
+            {selectedFlight && (
               <motion.div
-                key={flightData.flightNumber}
+                key={`${selectedFlight.flightNumber}-${selectedFlight.departureTime}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ ...spring, delay: 0.1 }}
-                className="mt-4"
+                className="mt-3"
               >
-                <FlightCard flight={flightData} />
+                <FlightCard flight={selectedFlight} />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Footer — hidden when card is showing */}
+          {/* Footer */}
           {!hasResult && (
             <footer className="mt-16 text-white/15 text-[10px] font-medium uppercase tracking-[0.2em]">
               Precision aviation tools
@@ -97,6 +125,8 @@ export default function FlightApp() {
           from { transform: scaleX(0); }
           to { transform: scaleX(1); }
         }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </main>
   )
