@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { AirplaneTakeoff, Key, Info, CircleNotch, CalendarBlank } from "@phosphor-icons/react"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,13 +12,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { CalendarIcon, PlaneTakeoff, KeyRound, Info, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { getFlightInfo } from "@/lib/flightAPI"
 import { FlightInfo } from "@/types/flight"
 import FlightCard from "@/components/FlightCard"
+import MagneticButton from "@/components/MagneticButton"
 
-const DEFAULT_API_KEY = process.env.NEXT_PUBLIC_DEFAULT_AERO_DATABOX_API_KEY || "";
+const DEFAULT_API_KEY = process.env.NEXT_PUBLIC_DEFAULT_AERO_DATABOX_API_KEY || ""
+
+const springTransition = { type: "spring" as const, stiffness: 300, damping: 30 }
+
+const formFieldVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { ...springTransition, delay: 0.7 + i * 0.12 },
+  }),
+}
 
 export function FlightSelector() {
   const [flightNumber, setFlightNumber] = useState("")
@@ -29,7 +42,7 @@ export function FlightSelector() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const apiKeyToUse = userApiKey.trim() || DEFAULT_API_KEY;
+    const apiKeyToUse = userApiKey.trim() || DEFAULT_API_KEY
 
     if (!flightNumber || !date || !apiKeyToUse) {
       toast({
@@ -59,31 +72,45 @@ export function FlightSelector() {
   }
 
   return (
-    <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
-      <div className="glass-card rounded-[2.5rem] p-10 shadow-[0_48px_80px_-16px_rgba(0,0,0,0.8)] border border-white/5 relative overflow-hidden tilt-3d">
-        {/* Top Highlight */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-60"></div>
-
-        <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <Label htmlFor="flight-number" className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 ml-1">
+    <div className="w-full space-y-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...springTransition, delay: 0.5 }}
+        className="glass-surface rounded-2xl p-8 lg:p-10"
+      >
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div
+              custom={0}
+              variants={formFieldVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-3"
+            >
+              <Label htmlFor="flight-number" className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground ml-1">
                 Flight Number
               </Label>
-              <div className="relative group transition-transform hover:scale-[1.02] duration-300">
-                <PlaneTakeoff className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary group-hover:text-primary/40" />
+              <div className="relative group">
+                <AirplaneTakeoff className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary" weight="duotone" />
                 <Input
                   id="flight-number"
                   placeholder="e.g. BA1326"
-                  className="bg-white/5 border-white/10 h-16 pl-14 rounded-2xl text-xl font-bold tracking-tight transition-all duration-300 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/10"
+                  className="bg-white/[0.04] border-white/[0.08] h-14 pl-12 rounded-xl text-lg font-medium tracking-tight transition-all duration-200 focus:bg-white/[0.07] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 placeholder:text-white/15"
                   value={flightNumber}
                   onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div className="space-y-4">
-              <Label className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 ml-1">
+            <motion.div
+              custom={1}
+              variants={formFieldVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-3"
+            >
+              <Label className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground ml-1">
                 Departure Date
               </Label>
               <Popover>
@@ -91,85 +118,106 @@ export function FlightSelector() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left h-16 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/40 px-5 transition-all duration-300 group hover:scale-[1.02]",
-                      !date && "text-white/20",
-                      date && "text-white text-xl font-bold"
+                      "w-full justify-start text-left h-14 rounded-xl bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.07] hover:border-primary/30 px-4 transition-all duration-200 group",
+                      !date && "text-white/15",
+                      date && "text-white text-lg font-medium"
                     )}
                   >
-                    <CalendarIcon className="mr-4 h-5 w-5 text-white/20 transition-colors group-hover:text-primary/40" />
+                    <CalendarBlank className="mr-3 h-5 w-5 text-white/20 transition-colors group-hover:text-primary/50" weight="duotone" />
                     {date ? format(date, "MMM d, yyyy") : "When are you flying?"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-background border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-3xl" align="end">
+                <PopoverContent className="w-auto p-0 bg-background border-white/[0.08] rounded-xl overflow-hidden shadow-2xl backdrop-blur-3xl" align="end">
                   <Calendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
                     initialFocus
-                    disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
+                    disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
                     className="p-4"
                   />
                 </PopoverContent>
               </Popover>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="space-y-4">
-             <div className="flex items-center justify-between ml-1">
-              <Label htmlFor="api-key" className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">
+          <motion.div
+            custom={2}
+            variants={formFieldVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-3"
+          >
+            <div className="flex items-center justify-between ml-1">
+              <Label htmlFor="api-key" className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
                 API Key (Optional)
               </Label>
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger className="cursor-help">
-                    <Info className="h-4 w-4 text-white/20 hover:text-primary/60 transition-colors" />
+                    <Info className="h-4 w-4 text-white/20 hover:text-primary/60 transition-colors" weight="duotone" />
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-zinc-900 border-white/10 text-white/80 p-3 rounded-xl shadow-2xl max-w-xs">
-                    <p className="text-xs font-medium leading-relaxed">
+                  <TooltipContent side="top" className="bg-card border-white/[0.08] text-white/80 p-3 rounded-lg shadow-2xl max-w-xs">
+                    <p className="text-xs leading-relaxed">
                       We use a shared key, but you can provide your own from AeroDataBox if needed.
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="relative group transition-transform hover:scale-[1.01] duration-300">
-              <KeyRound className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary group-hover:text-primary/40" />
+            <div className="relative group">
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary" weight="duotone" />
               <Input
                 id="api-key"
                 type="password"
                 placeholder="Optional override"
-                className="bg-white/5 border-white/10 h-16 pl-14 rounded-2xl font-bold transition-all duration-300 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/10"
+                className="bg-white/[0.04] border-white/[0.08] h-14 pl-12 rounded-xl font-medium transition-all duration-200 focus:bg-white/[0.07] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 placeholder:text-white/15"
                 value={userApiKey}
                 onChange={(e) => setUserApiKey(e.target.value)}
               />
             </div>
-          </div>
+          </motion.div>
 
-          <Button
-            type="submit"
-            className={cn(
-              "w-full h-18 py-8 rounded-3xl text-xl font-black transition-all duration-500 transform active:scale-95 shadow-[0_20px_40px_rgba(217,110,96,0.3)]",
-              "bg-gradient-to-br from-primary via-[#E07A6D] to-primary hover:shadow-[0_25px_60px_rgba(217,110,96,0.5)] border-t border-white/30 hover:scale-[1.02] tracking-tight uppercase"
-            )}
-            disabled={isLoading}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ ...springTransition, delay: 1.2 }}
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                Searching...
-              </span>
-            ) : (
-              "Track Flight"
-            )}
-          </Button>
+            <MagneticButton
+              type="submit"
+              disabled={isLoading}
+              className={cn(
+                "w-full h-14 rounded-xl text-base font-semibold transition-all duration-300 active:scale-[0.98]",
+                "bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_8px_24px_rgba(212,96,62,0.25)] hover:shadow-[0_12px_32px_rgba(212,96,62,0.35)] tracking-tight",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <CircleNotch className="h-5 w-5 animate-spin" weight="bold" />
+                  Searching...
+                </span>
+              ) : (
+                "Track Flight"
+              )}
+            </MagneticButton>
+          </motion.div>
         </form>
-      </div>
+      </motion.div>
 
-      {flightData && (
-        <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 fill-mode-both perspective-1000">
-          <FlightCard flight={flightData} />
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {flightData && (
+          <motion.div
+            key="flight-card"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ ...springTransition, delay: 0.1 }}
+          >
+            <FlightCard flight={flightData} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

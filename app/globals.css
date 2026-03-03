@@ -4,26 +4,30 @@
 
 @layer base {
   :root {
-    --background: 228 15% 6%; /* #0B0C11 - Deep Navy/Charcoal */
-    --foreground: 0 0% 98%;
-    --card: 228 15% 8%;
-    --card-foreground: 0 0% 98%;
-    --popover: 228 15% 8%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 6 62% 62%; /* #D96E60 - Flighty Coral */
+    --background: 225 20% 5%;
+    --foreground: 0 0% 96%;
+    --card: 225 18% 8%;
+    --card-foreground: 0 0% 96%;
+    --popover: 225 18% 8%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 8 70% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 228 15% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 228 10% 15%;
-    --muted-foreground: 228 5% 65%;
-    --accent: 6 62% 62%;
+    --secondary: 225 15% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 225 12% 14%;
+    --muted-foreground: 225 8% 55%;
+    --accent: 8 70% 58%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 228 15% 15%;
-    --input: 228 15% 15%;
-    --ring: 6 62% 62%;
+    --border: 225 12% 14%;
+    --input: 225 12% 14%;
+    --ring: 8 70% 58%;
     --radius: 1.5rem;
+
+    --surface-glass: 225 18% 10%;
+    --runway: 8 70% 58%;
+    --altitude: 210 60% 50%;
   }
 }
 
@@ -32,76 +36,21 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground selection:bg-primary/30;
-    background-image:
-      radial-gradient(at 0% 0%, rgba(217, 110, 96, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.4) 0px, transparent 50%);
-    min-height: 100vh;
+    @apply bg-background text-foreground selection:bg-primary/30 font-sans antialiased;
+    min-height: 100dvh;
   }
 }
 
 @layer utilities {
-  .grain {
-    position: relative;
-  }
-
-  .grain::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.04;
-    pointer-events: none;
-    z-index: 50;
-    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-    filter: contrast(150%) brightness(100%);
-  }
-
-  .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
-  }
-
-  .perspective-1000 {
-    perspective: 1000px;
-  }
-
-  .preserve-3d {
-    transform-style: preserve-3d;
-  }
-
-  .tilt-3d {
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    @apply preserve-3d;
-  }
-
-  .tilt-3d:hover {
-    transform: rotateX(4deg) rotateY(4deg) translateY(-8px);
-    @apply shadow-[0_20px_40px_rgba(0,0,0,0.4)];
-  }
-
-  .float-3d {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    33% { transform: translateY(-10px) rotate(1deg); }
-    66% { transform: translateY(-5px) rotate(-1deg); }
-  }
-
-  .animate-blob {
-    animation: blob 10s infinite;
-  }
-
-  @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+  .glass-surface {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.06];
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+      inset 0 0 20px 0 rgba(255, 255, 255, 0.01);
   }
 
   .text-glow {
-    text-shadow: 0 0 15px rgba(217, 110, 96, 0.5);
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.4);
   }
 }

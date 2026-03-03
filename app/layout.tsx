@@ -1,15 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 
-const inter = Inter({ subsets: ["latin"] })
-
 export const metadata: Metadata = {
-  title: "Flight Selector",
+  title: "FlightCal",
   description: "Select your flight and add it to your calendar",
-  generator: 'v0.dev',
   icons: {
     icon: '/flight-logo.png',
     shortcut: '/flight-logo.png',
@@ -27,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
         {children}
         <Toaster />
       </body>
