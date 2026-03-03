@@ -110,6 +110,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
               <Input
                 id="flight-number"
                 placeholder="e.g. BA1326"
+                aria-required="true"
                 className={cn(
                   "bg-white/[0.04] border-white/[0.08] rounded-xl font-medium tracking-tight transition-all duration-200 focus:bg-white/[0.07] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 placeholder:text-white/15",
                   hasResult ? "h-10 pl-10 text-sm" : "h-14 pl-12 text-lg"
@@ -134,6 +135,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
+                  aria-label="Select departure date"
                   className={cn(
                     "w-full justify-start text-left rounded-xl bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.07] hover:border-primary/30 transition-all duration-200 group",
                     hasResult ? "h-10 px-3 text-sm" : "h-14 px-4",
@@ -187,7 +189,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
                 </Label>
                 <TooltipProvider>
                   <Tooltip delayDuration={100}>
-                    <TooltipTrigger className="cursor-help">
+                    <TooltipTrigger className="cursor-help" aria-label="API Key Information">
                       <Info
                         className="h-4 w-4 text-white/20 hover:text-primary/60 transition-colors"
                         weight="duotone"
@@ -231,6 +233,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
           <MagneticButton
             type="submit"
             disabled={isLoading}
+            aria-busy={isLoading}
             className={cn(
               "w-full rounded-xl font-semibold transition-all duration-300 active:scale-[0.98]",
               "bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_8px_24px_rgba(212,96,62,0.25)] hover:shadow-[0_12px_32px_rgba(212,96,62,0.35)] tracking-tight",
@@ -239,7 +242,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
             )}
           >
             {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
+              <span className="flex items-center justify-center gap-2" aria-live="polite">
                 <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
                 Searching...
               </span>
