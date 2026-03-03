@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useMemo, useEffect } from 'react'
+import { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { QuadraticBezierLine, Stars } from '@react-three/drei'
 import * as THREE from 'three'
@@ -16,12 +16,12 @@ function Globe() {
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[2, 64, 64]} />
+      <sphereGeometry args={[2, 48, 48]} />
       <meshBasicMaterial
-        color="#0A1628"
+        color="#3B6B9A"
         wireframe
         transparent
-        opacity={0.15}
+        opacity={0.35}
       />
     </mesh>
   )
@@ -38,20 +38,18 @@ function Atmosphere() {
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[2.08, 64, 64]} />
+      <sphereGeometry args={[2.15, 48, 48]} />
       <meshBasicMaterial
-        color="#1E3A5F"
+        color="#4A8BC2"
         side={THREE.BackSide}
         transparent
-        opacity={0.08}
+        opacity={0.12}
       />
     </mesh>
   )
 }
 
 function FlightArc() {
-  const lineRef = useRef<THREE.Mesh>(null)
-
   const toSphere = (lat: number, lon: number, r: number): [number, number, number] => {
     const phi = (90 - lat) * (Math.PI / 180)
     const theta = (lon + 180) * (Math.PI / 180)
@@ -67,21 +65,20 @@ function FlightArc() {
   const end = useMemo(() => new THREE.Vector3(...toSphere(40.64, -73.78, 2)), [])
   const mid = useMemo(() => {
     const m = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5)
-    m.normalize().multiplyScalar(3.2)
+    m.normalize().multiplyScalar(3.4)
     return m
   }, [start, end])
 
   return (
     <QuadraticBezierLine
-      ref={lineRef}
       start={start}
       end={end}
       mid={mid}
       color="#D4603E"
-      lineWidth={1.5}
+      lineWidth={2}
       dashed
-      dashScale={8}
-      dashSize={0.4}
+      dashScale={6}
+      dashSize={0.5}
       dashOffset={0}
     />
   )
@@ -90,7 +87,7 @@ function FlightArc() {
 function Scene() {
   return (
     <>
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.5} />
       <Globe />
       <Atmosphere />
       <FlightArc />
@@ -98,7 +95,7 @@ function Scene() {
         radius={80}
         depth={60}
         count={500}
-        factor={2}
+        factor={2.5}
         saturation={0}
         fade
         speed={0.3}
@@ -108,18 +105,10 @@ function Scene() {
 }
 
 export default function GlobeBackground() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    return () => {
-      // Cleanup on unmount
-    }
-  }, [])
-
   return (
-    <div ref={containerRef} className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 w-full h-full">
       <Canvas
-        camera={{ position: [0, 2, 5], fov: 45 }}
+        camera={{ position: [0, 1.5, 5], fov: 50 }}
         dpr={[1, 1.5]}
         gl={{ alpha: true, antialias: true }}
         style={{ background: 'transparent' }}

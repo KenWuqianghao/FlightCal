@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   title: "FlightCal",
   description: "Select your flight and add it to your calendar",
   icons: {
-    icon: '/flight-logo.png',
-    shortcut: '/flight-logo.png',
-    apple: '/flight-logo.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
   openGraph: {
     images: ['https://flight-cal.vercel.app/screenshot.jpg'],
