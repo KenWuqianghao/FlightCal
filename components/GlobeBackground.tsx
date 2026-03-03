@@ -101,11 +101,13 @@ function EarthSphere() {
     <mesh ref={meshRef}>
       <sphereGeometry args={[2, 64, 64]} />
       <meshPhysicalMaterial
-        color="#3a5a7a"
-        transmission={0.6}
-        roughness={0.3}
-        thickness={1.5}
-        ior={1.5}
+        color="#90c0e8"
+        transmission={0.92}
+        roughness={0.5}
+        thickness={1.2}
+        ior={1.4}
+        clearcoat={0.3}
+        clearcoatRoughness={0.4}
         transparent
       />
     </mesh>
@@ -248,7 +250,7 @@ function GlobeGroup({
       {/* Atmosphere glow */}
       <mesh>
         <sphereGeometry args={[2.2, 48, 48]} />
-        <meshBasicMaterial color="#4A8BC2" side={THREE.BackSide} transparent opacity={0.12} />
+        <meshBasicMaterial color="#7AB8E0" side={THREE.BackSide} transparent opacity={0.07} />
       </mesh>
       {/* Flight routes */}
       {flights.map((f, i) => (
@@ -297,8 +299,9 @@ function Scene({ flights, selectedIndex }: GlobeProps) {
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 3, 5]} intensity={0.8} />
+      <ambientLight intensity={1.0} />
+      <directionalLight position={[5, 3, 5]} intensity={0.4} />
+      <directionalLight position={[-4, -2, -3]} intensity={0.25} />
       <GlobeGroup flights={flights} selectedIndex={selectedIndex} isDragging={isDragging} />
       <Stars radius={80} depth={60} count={500} factor={2.5} saturation={0} fade speed={0.3} />
       <OrbitControls
