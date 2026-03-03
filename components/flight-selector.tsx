@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,13 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { CalendarIcon, PlaneTakeoff, KeyRound, Info } from "lucide-react"
+import { CalendarIcon, PlaneTakeoff, KeyRound, Info, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { getFlightInfo } from "@/lib/flightAPI"
 import { FlightInfo } from "@/types/flight"
 import FlightCard from "@/components/FlightCard"
 
-// Attempt to get the default API key from environment variables, fallback to empty string
 const DEFAULT_API_KEY = process.env.NEXT_PUBLIC_DEFAULT_AERO_DATABOX_API_KEY || "";
 
 export function FlightSelector() {
@@ -33,15 +32,9 @@ export function FlightSelector() {
     const apiKeyToUse = userApiKey.trim() || DEFAULT_API_KEY;
 
     if (!flightNumber || !date || !apiKeyToUse) {
-      let description = "Please enter flight number, select a date";
-      if (!apiKeyToUse) {
-        description += ", and provide an API key (the default key might be missing or exhausted).";
-      } else {
-        description += ".";
-      }
       toast({
-        title: "Missing information",
-        description: description,
+        title: "Incomplete details",
+        description: "Please enter your flight number and departure date.",
         variant: "destructive",
       })
       return
@@ -53,23 +46,11 @@ export function FlightSelector() {
       const formattedDate = format(date, "yyyy-MM-dd")
       const data = await getFlightInfo(flightNumber, formattedDate, apiKeyToUse)
       setFlightData(data)
-      toast({
-        title: "Flight Info Fetched",
-        description: `Successfully fetched data for ${flightNumber}.`,
-      })
     } catch (error) {
       console.error("Error fetching flight info:", error)
-      let errorMessage = "Failed to fetch flight information."
-      if (error instanceof Error) {
-        errorMessage = error.message
-      }
-       // Check if the error might be due to the default key and user hasn't provided one
-      if (apiKeyToUse === DEFAULT_API_KEY && !userApiKey.trim() && error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized') || error.message.includes('limit')) ) {
-        errorMessage += " The default API key might have issues or reached its limit. Try entering your own API key.";
-      }
       toast({
-        title: "Error Fetching Flight Info",
-        description: errorMessage,
+        title: "Flight not found",
+        description: "We couldn't retrieve information for this flight. Please check the flight number and date.",
         variant: "destructive",
       })
     } finally {
@@ -78,78 +59,86 @@ export function FlightSelector() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl animate-fade-in">
-      <div className="p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="flight-number" className="text-sm font-medium">
-              Flight Number
-            </Label>
-            <div className="relative">
-              <PlaneTakeoff className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                id="flight-number"
-                placeholder="e.g. BA1326"
-                className="pl-10 h-12 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 focus:border-gray-400"
-                value={flightNumber}
-                onChange={(e) => setFlightNumber(e.target.value)}
-              />
+    <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+      <div className="glass-card rounded-[2.5rem] p-10 shadow-[0_48px_80px_-16px_rgba(0,0,0,0.8)] border border-white/5 relative overflow-hidden tilt-3d">
+        {/* Top Highlight */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-60"></div>
+
+        <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <Label htmlFor="flight-number" className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 ml-1">
+                Flight Number
+              </Label>
+              <div className="relative group transition-transform hover:scale-[1.02] duration-300">
+                <PlaneTakeoff className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary group-hover:text-primary/40" />
+                <Input
+                  id="flight-number"
+                  placeholder="e.g. BA1326"
+                  className="bg-white/5 border-white/10 h-16 pl-14 rounded-2xl text-xl font-bold tracking-tight transition-all duration-300 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/10"
+                  value={flightNumber}
+                  onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-xs font-black uppercase tracking-[0.2em] text-primary/60 ml-1">
+                Departure Date
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left h-16 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/40 px-5 transition-all duration-300 group hover:scale-[1.02]",
+                      !date && "text-white/20",
+                      date && "text-white text-xl font-bold"
+                    )}
+                  >
+                    <CalendarIcon className="mr-4 h-5 w-5 text-white/20 transition-colors group-hover:text-primary/40" />
+                    {date ? format(date, "MMM d, yyyy") : "When are you flying?"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-background border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-3xl" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                    disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
+                    className="p-4"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Flight Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal h-12 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 focus:border-gray-400",
-                    !date && "text-gray-400",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                  disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
-                  className="rounded-md border"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="api-key" className="text-sm font-medium">
-                API Key
+          <div className="space-y-4">
+             <div className="flex items-center justify-between ml-1">
+              <Label htmlFor="api-key" className="text-xs font-black uppercase tracking-[0.2em] text-primary/40">
+                API Key (Optional)
               </Label>
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger className="cursor-help">
-                    <Info className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    <Info className="h-4 w-4 text-white/20 hover:text-primary/60 transition-colors" />
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs bg-gray-800 text-white p-2 rounded-md shadow-lg">
-                    <p className="text-xs">
-                      A default free-tier API key is used. If it runs out or you have issues, you can enter your own AeroDataBox API key here. Your key won't be stored.
+                  <TooltipContent side="top" className="bg-zinc-900 border-white/10 text-white/80 p-3 rounded-xl shadow-2xl max-w-xs">
+                    <p className="text-xs font-medium leading-relaxed">
+                      We use a shared key, but you can provide your own from AeroDataBox if needed.
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <div className="relative group transition-transform hover:scale-[1.01] duration-300">
+              <KeyRound className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 transition-colors group-focus-within:text-primary group-hover:text-primary/40" />
               <Input
                 id="api-key"
                 type="password"
-                placeholder="Using default key (optional override)"
-                className="pl-10 h-12 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 focus:border-gray-400"
+                placeholder="Optional override"
+                className="bg-white/5 border-white/10 h-16 pl-14 rounded-2xl font-bold transition-all duration-300 focus:bg-white/10 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/10"
                 value={userApiKey}
                 onChange={(e) => setUserApiKey(e.target.value)}
               />
@@ -159,37 +148,25 @@ export function FlightSelector() {
           <Button
             type="submit"
             className={cn(
-              "w-full h-12 transition-all duration-300 text-white",
-              "bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600"
+              "w-full h-18 py-8 rounded-3xl text-xl font-black transition-all duration-500 transform active:scale-95 shadow-[0_20px_40px_rgba(217,110,96,0.3)]",
+              "bg-gradient-to-br from-primary via-[#E07A6D] to-primary hover:shadow-[0_25px_60px_rgba(217,110,96,0.5)] border-t border-white/30 hover:scale-[1.02] tracking-tight uppercase"
             )}
             disabled={isLoading}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Fetching Flight Info...
+                <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                Searching...
               </span>
             ) : (
-              "Fetch Flight Info"
+              "Track Flight"
             )}
           </Button>
         </form>
       </div>
 
       {flightData && (
-        <div className="p-8 pt-4 flex flex-col items-center space-y-4">
+        <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 fill-mode-both perspective-1000">
           <FlightCard flight={flightData} />
         </div>
       )}
