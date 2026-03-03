@@ -33,8 +33,8 @@ export default function FlightApp() {
       </div>
 
       {/* Content grid */}
-      <div className="relative z-10 grid min-h-[100dvh] grid-cols-1 lg:grid-cols-[1fr_0.6fr]">
-        <div className="flex flex-col justify-center w-full px-4 py-6 lg:px-16 lg:py-8">
+      <div className="relative z-10 grid min-h-[100dvh] grid-cols-1 lg:grid-cols-[1fr_0.6fr] pointer-events-none">
+        <div className="pointer-events-auto flex flex-col justify-center w-full px-4 py-6 lg:px-16 lg:py-8">
           {/* Runway accent */}
           <div
             className="w-12 h-[2px] bg-primary mb-5 origin-left"

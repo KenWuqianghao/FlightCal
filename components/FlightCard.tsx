@@ -73,7 +73,7 @@ export default function FlightCard({ flight }: AdaptedFlightCardProps) {
         <div className="px-5 pt-5 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white p-1.5 shadow-sm" style={{ backgroundColor: 'white' }}>
                 <Image
                   src={logoUrl}
                   alt={`${airline || 'Airline'} logo`}

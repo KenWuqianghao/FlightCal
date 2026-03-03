@@ -90,9 +90,8 @@ function EarthSphere() {
     loader.load(EARTH_TEXTURE_URL, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace
       if (meshRef.current) {
-        const mat = meshRef.current.material as THREE.MeshBasicMaterial
+        const mat = meshRef.current.material as THREE.MeshPhysicalMaterial
         mat.map = texture
-        mat.color.set('#5a7a9a')
         mat.needsUpdate = true
       }
     })
@@ -101,7 +100,14 @@ function EarthSphere() {
   return (
     <mesh ref={meshRef}>
       <sphereGeometry args={[2, 64, 64]} />
-      <meshBasicMaterial color="#0D1520" />
+      <meshPhysicalMaterial
+        color="#3a5a7a"
+        transmission={0.6}
+        roughness={0.3}
+        thickness={1.5}
+        ior={1.5}
+        transparent
+      />
     </mesh>
   )
 }
@@ -204,12 +210,13 @@ interface FlightRouteData {
 function GlobeGroup({
   flights,
   selectedIndex,
+  isDragging,
 }: {
   flights: FlightRouteData[]
   selectedIndex: number
+  isDragging: { current: boolean }
 }) {
   const groupRef = useRef<THREE.Group>(null)
-  const isDragging = useRef(false)
 
   const targetRotY = useMemo(() => {
     const selected = flights[selectedIndex]
@@ -238,15 +245,10 @@ function GlobeGroup({
   return (
     <group ref={groupRef}>
       <EarthSphere />
-      {/* Faint wireframe grid overlay */}
-      <mesh>
-        <sphereGeometry args={[2.003, 36, 36]} />
-        <meshBasicMaterial color="#4A7FB5" wireframe transparent opacity={0.06} />
-      </mesh>
       {/* Atmosphere glow */}
       <mesh>
         <sphereGeometry args={[2.2, 48, 48]} />
-        <meshBasicMaterial color="#4A8BC2" side={THREE.BackSide} transparent opacity={0.1} />
+        <meshBasicMaterial color="#4A8BC2" side={THREE.BackSide} transparent opacity={0.12} />
       </mesh>
       {/* Flight routes */}
       {flights.map((f, i) => (
@@ -268,12 +270,39 @@ interface GlobeProps {
 }
 
 function Scene({ flights, selectedIndex }: GlobeProps) {
+  const isDragging = useRef(false)
+  const controlsRef = useRef<any>(null)
+  const resumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const controls = controlsRef.current
+    if (!controls) return
+    const onStart = () => {
+      if (resumeTimeout.current) clearTimeout(resumeTimeout.current)
+      isDragging.current = true
+    }
+    const onEnd = () => {
+      resumeTimeout.current = setTimeout(() => {
+        isDragging.current = false
+      }, 3000)
+    }
+    controls.addEventListener('start', onStart)
+    controls.addEventListener('end', onEnd)
+    return () => {
+      controls.removeEventListener('start', onStart)
+      controls.removeEventListener('end', onEnd)
+      if (resumeTimeout.current) clearTimeout(resumeTimeout.current)
+    }
+  }, [])
+
   return (
     <>
       <ambientLight intensity={0.6} />
-      <GlobeGroup flights={flights} selectedIndex={selectedIndex} />
+      <directionalLight position={[5, 3, 5]} intensity={0.8} />
+      <GlobeGroup flights={flights} selectedIndex={selectedIndex} isDragging={isDragging} />
       <Stars radius={80} depth={60} count={500} factor={2.5} saturation={0} fade speed={0.3} />
       <OrbitControls
+        ref={controlsRef}
         enableZoom={false}
         enablePan={false}
         rotateSpeed={0.4}
