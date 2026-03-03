@@ -6,6 +6,11 @@ const GlobeBackground = dynamic(() => import('@/components/GlobeBackground'), {
   ssr: false,
 })
 
-export default function GlobeWrapper() {
-  return <GlobeBackground />
+interface GlobeWrapperProps {
+  origin?: string
+  destination?: string
+}
+
+export default function GlobeWrapper({ origin, destination }: GlobeWrapperProps) {
+  return <GlobeBackground origin={origin} destination={destination} />
 }
