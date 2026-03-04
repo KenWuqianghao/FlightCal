@@ -77,8 +77,10 @@ export default function FlightApp() {
                 <button
                   key={`${f.flightNumber}-${f.departureTime}-${i}`}
                   onClick={() => setSelectedIndex(i)}
+                  aria-label={`View details for flight ${f.flightNumber} from ${f.origin} to ${f.destination}`}
                   className={cn(
                     "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     i === selectedIndex
                       ? "bg-primary/15 border border-primary/25 text-primary"
                       : "bg-white/[0.04] border border-white/[0.06] text-muted-foreground hover:bg-white/[0.08]"

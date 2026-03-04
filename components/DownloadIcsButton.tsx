@@ -48,7 +48,8 @@ export function DownloadIcsButton({ flight, className }: DownloadIcsButtonProps)
     <Button
       onClick={handleDownloadIcs}
       variant="outline"
-      className={`w-full md:w-auto ${className || ''}`}
+      className={`w-full md:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${className || ''}`}
+      aria-label={`Download .ics calendar file for flight ${flight.flightNumber}`}
     >
       <DownloadSimple className="mr-2 h-4 w-4" weight="duotone" />
       Download .ics
