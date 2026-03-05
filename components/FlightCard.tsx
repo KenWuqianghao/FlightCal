@@ -185,9 +185,15 @@ export default function FlightCard({ flight }: AdaptedFlightCardProps) {
         <div className="px-5 py-3 border-t border-white/[0.06] flex flex-col sm:flex-row gap-2">
           <Button
             asChild
-            className="flex-1 h-10 rounded-lg bg-white text-black hover:bg-white/90 font-semibold text-sm transition-all duration-200 active:scale-[0.98]"
+            className="flex-1 h-10 rounded-lg bg-white text-black hover:bg-white/90 font-semibold text-sm transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <a href={googleCalendarLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+            <a
+              href={googleCalendarLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2"
+              aria-label={`Add flight ${flightNumber} to Google Calendar (opens in a new tab)`}
+            >
               <CalendarDots className="h-4 w-4" weight="duotone" />
               Add to Google
             </a>

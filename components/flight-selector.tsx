@@ -110,6 +110,9 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
               <Input
                 id="flight-number"
                 placeholder="e.g. BA1326"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
                 className={cn(
                   "bg-white/[0.04] border-white/[0.08] rounded-xl font-medium tracking-tight transition-all duration-200 focus:bg-white/[0.07] focus:border-primary/40 focus:ring-2 focus:ring-primary/10 placeholder:text-white/15",
                   hasResult ? "h-10 pl-10 text-sm" : "h-14 pl-12 text-lg"
@@ -187,7 +190,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
                 </Label>
                 <TooltipProvider>
                   <Tooltip delayDuration={100}>
-                    <TooltipTrigger className="cursor-help">
+                    <TooltipTrigger className="cursor-help" aria-label="API Key Information">
                       <Info
                         className="h-4 w-4 text-white/20 hover:text-primary/60 transition-colors"
                         weight="duotone"
@@ -233,6 +236,7 @@ export function FlightSelector({ onFlightFound, hasResult }: FlightSelectorProps
             disabled={isLoading}
             className={cn(
               "w-full rounded-xl font-semibold transition-all duration-300 active:scale-[0.98]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_8px_24px_rgba(212,96,62,0.25)] hover:shadow-[0_12px_32px_rgba(212,96,62,0.35)] tracking-tight",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               hasResult ? "h-10 text-sm" : "h-14 text-base"
